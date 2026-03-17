@@ -20,12 +20,12 @@ type Board struct {
 
 // Game represents the state of an Ultimate Tic Tac Toe game.
 type Game struct {
-	ID            string       `json:"id"`
-	SubBoards     [9]Board     `json:"sub_boards"`
-	CurrentPlayer CellState    `json:"current_player"`
-	NextBoardIdx  int          `json:"next_board_idx"` // -1 means any board is allowed
-	Winner        CellState    `json:"winner"`
-	IsGameOver    bool         `json:"is_game_over"`
+	ID            string    `json:"id"`
+	SubBoards     [9]Board  `json:"sub_boards"`
+	CurrentPlayer CellState `json:"current_player"`
+	NextBoardIdx  int       `json:"next_board_idx"` // -1 means any board is allowed
+	Winner        CellState `json:"winner"`
+	IsGameOver    bool      `json:"is_game_over"`
 }
 
 // Errors
