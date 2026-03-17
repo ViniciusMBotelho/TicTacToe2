@@ -78,9 +78,9 @@ func (s *gameService) MakeMove(ctx context.Context, req dto.MoveRequest) (*model
 	targetBoard.Cells[req.CellIdx] = game.CurrentPlayer
 
 	// Check Sub-Board Winner
-	if winner := s.calculateWinner(targetBoard.Cells[:]); winner != models.Empty {
+	if winner := models.CalculateWinner(targetBoard.Cells[:]); winner != models.Empty {
 		targetBoard.Winner = winner
-	} else if s.isBoardFull(targetBoard.Cells[:]) {
+	} else if models.IsBoardFull(targetBoard.Cells[:]) {
 		targetBoard.Winner = models.Tie
 	}
 
@@ -89,10 +89,10 @@ func (s *gameService) MakeMove(ctx context.Context, req dto.MoveRequest) (*model
 	for i := 0; i < 9; i++ {
 		globalCells[i] = game.SubBoards[i].Winner
 	}
-	if globalWinner := s.calculateWinner(globalCells[:]); globalWinner != models.Empty {
+	if globalWinner := models.CalculateWinner(globalCells[:]); globalWinner != models.Empty {
 		game.Winner = globalWinner
 		game.IsGameOver = true
-	} else if s.isBoardFull(globalCells[:]) {
+	} else if models.IsBoardFull(globalCells[:]) {
 		game.Winner = models.Tie
 		game.IsGameOver = true
 	}
@@ -116,29 +116,3 @@ func (s *gameService) MakeMove(ctx context.Context, req dto.MoveRequest) (*model
 
 	return game, nil
 }
-
-func (s *gameService) calculateWinner(cells []models.CellState) models.CellState {
-	winPatterns := [8][3]int{
-		{0, 1, 2}, {3, 4, 5}, {6, 7, 8}, // Rows
-		{0, 3, 6}, {1, 4, 7}, {2, 5, 8}, // Columns
-		{0, 4, 8}, {2, 4, 6},             // Diagonals
-	}
-
-	for _, p := range winPatterns {
-		if cells[p[0]] != models.Empty && cells[p[0]] != models.Tie &&
-			cells[p[0]] == cells[p[1]] && cells[p[0]] == cells[p[2]] {
-			return cells[p[0]]
-		}
-	}
-	return models.Empty
-}
-
-func (s *gameService) isBoardFull(cells []models.CellState) bool {
-	for _, c := range cells {
-		if c == models.Empty {
-			return false
-		}
-	}
-	return true
-}
-
