@@ -37,7 +37,7 @@ func (m *mockService) MakeMove(ctx context.Context, req dto.MoveRequest) (*model
 	return nil, models.ErrGameNotFound
 }
 
-func setupTestRouter(h *GameHandler) *chi.Mux {
+func setupTestRouter(h *TicTacToe2Handler) *chi.Mux {
 	r := chi.NewRouter()
 	r.Route("/games", func(r chi.Router) {
 		r.Post("/", h.CreateGame)
@@ -49,7 +49,7 @@ func setupTestRouter(h *GameHandler) *chi.Mux {
 
 func TestGetGameState_REST(t *testing.T) {
 	svc := &mockService{game: &models.Game{ID: "test-id"}}
-	handler := NewGameHandler(svc)
+	handler := NewTicTacToe2Handler(svc)
 	router := setupTestRouter(handler)
 
 	req := httptest.NewRequest(http.MethodGet, "/games/test-id", nil)
@@ -73,7 +73,7 @@ func TestGetGameState_REST(t *testing.T) {
 
 func TestMakeMove_REST(t *testing.T) {
 	svc := &mockService{game: &models.Game{ID: "test-id"}}
-	handler := NewGameHandler(svc)
+	handler := NewTicTacToe2Handler(svc)
 	router := setupTestRouter(handler)
 
 	move := dto.MoveRequest{BoardIdx: 0, CellIdx: 4}

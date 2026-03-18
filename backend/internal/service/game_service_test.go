@@ -102,7 +102,7 @@ func TestBoardWin(t *testing.T) {
 	// O: 0,5 (sends X to 5)
 	// X: 5,0 (sends O to 0)
 	// O: 0,1 (sends X to 1) --- No, O should not take 1.
-	
+
 	moves := []struct{ b, c int }{
 		{0, 0}, // X (O->0)
 		{0, 3}, // O (X->3)
@@ -121,7 +121,7 @@ func TestBoardWin(t *testing.T) {
 
 	// Now X must go to 5 (from move 0,5)
 	svc.MakeMove(context.Background(), dto.MoveRequest{GameID: gameID, BoardIdx: 5, CellIdx: 0}) // X at 5,0 -> O to 0
-	
+
 	// O must go to 0
 	svc.MakeMove(context.Background(), dto.MoveRequest{GameID: gameID, BoardIdx: 0, CellIdx: 6}) // O at 0,6 -> X to 6
 

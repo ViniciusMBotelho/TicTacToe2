@@ -14,9 +14,13 @@ import (
 
 func main() {
 	// Dependency Injection
-	repo := repository.NewMemoryRepository()
-	svc := service.NewGameService(repo)
-	handler := handlers.NewGameHandler(svc)
+	tictactoe2Repo := repository.NewGameRepository()
+	tictactoe2Svc := service.NewGameService(tictactoe2Repo)
+	tictactoe2Handler := handlers.NewTicTacToe2Handler(tictactoe2Svc)
+
+	standardRepo := repository.NewStandardGameRepository()
+	standardSvc := service.NewStandardGameService(standardRepo)
+	standardHandler := handlers.NewStandardGameHandler(standardSvc)
 
 	// Router setup
 	r := chi.NewRouter()
@@ -35,13 +39,21 @@ func main() {
 
 	// Routes
 	r.Route("/games", func(r chi.Router) {
-		r.Post("/", handler.CreateGame)
-		r.Get("/{id}", handler.GetGameState)
-		r.Post("/{id}/move", handler.MakeMove)
+		r.Route("/tictactoe2", func(r chi.Router) {
+			r.Post("/", tictactoe2Handler.CreateGame)
+			r.Get("/{id}", tictactoe2Handler.GetGameState)
+			r.Post("/{id}/move", tictactoe2Handler.MakeMove)
+		})
+
+		r.Route("/standard", func(r chi.Router) {
+			r.Post("/", standardHandler.CreateGame)
+			r.Get("/{id}", standardHandler.GetGameState)
+			r.Post("/{id}/move", standardHandler.MakeMove)
+		})
 	})
 
 	port := ":8080"
-	fmt.Printf("Ultimate Tic Tac Toe Backend starting on %s...\n", port)
+	fmt.Printf("Tic-Tac-Toe-2 Backend starting on %s...\n", port)
 	if err := http.ListenAndServe(port, r); err != nil {
 		fmt.Printf("Error starting server: %v\n", err)
 	}

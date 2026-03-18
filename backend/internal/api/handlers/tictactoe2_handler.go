@@ -11,17 +11,17 @@ import (
 	"tictactoe/internal/ports"
 )
 
-type GameHandler struct {
+type TicTacToe2Handler struct {
 	service ports.GameService
 }
 
-// NewGameHandler creates a new instance of GameHandler.
-func NewGameHandler(service ports.GameService) *GameHandler {
-	return &GameHandler{service: service}
+// NewTicTacToe2Handler creates a new instance of TicTacToe2Handler.
+func NewTicTacToe2Handler(service ports.GameService) *TicTacToe2Handler {
+	return &TicTacToe2Handler{service: service}
 }
 
 // CreateGame handles the POST /game request.
-func (h *GameHandler) CreateGame(w http.ResponseWriter, r *http.Request) {
+func (h *TicTacToe2Handler) CreateGame(w http.ResponseWriter, r *http.Request) {
 	gameID, err := h.service.CreateGame(r.Context())
 	if err != nil {
 		h.respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -32,7 +32,7 @@ func (h *GameHandler) CreateGame(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetGameState handles the GET /game/{id} request.
-func (h *GameHandler) GetGameState(w http.ResponseWriter, r *http.Request) {
+func (h *TicTacToe2Handler) GetGameState(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		h.respondWithError(w, http.StatusBadRequest, "game id is required")
@@ -53,7 +53,7 @@ func (h *GameHandler) GetGameState(w http.ResponseWriter, r *http.Request) {
 }
 
 // MakeMove handles the POST /move request.
-func (h *GameHandler) MakeMove(w http.ResponseWriter, r *http.Request) {
+func (h *TicTacToe2Handler) MakeMove(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		h.respondWithError(w, http.StatusBadRequest, "game id is required")
@@ -84,11 +84,11 @@ func (h *GameHandler) MakeMove(w http.ResponseWriter, r *http.Request) {
 	h.respondWithJSON(w, http.StatusOK, game)
 }
 
-func (h *GameHandler) respondWithError(w http.ResponseWriter, code int, message string) {
+func (h *TicTacToe2Handler) respondWithError(w http.ResponseWriter, code int, message string) {
 	h.respondWithJSON(w, code, map[string]string{"error": message})
 }
 
-func (h *GameHandler) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+func (h *TicTacToe2Handler) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
