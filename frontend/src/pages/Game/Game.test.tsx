@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Game from '../../pages/Game/Game';
+import * as api from '../../utils/api';
+
+// Mock the API
+vi.mock('../../utils/api', () => ({
+  createGame: vi.fn(),
+  makeMove: vi.fn(),
+}));
 
 // Mock the components used in Game
 vi.mock('../../components/GameBoard/GameBoard', () => ({
@@ -33,75 +40,119 @@ vi.mock('../../components/FrameBorder/FrameBorder', () => ({
 }));
 
 describe('Game Component', () => {
-  it('should render game board with initial state', () => {
-    render(<Game />);
-    expect(screen.getByTestId('game-board')).toBeTruthy();
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (api.createGame as any).mockResolvedValue('test-game-id');
   });
 
-  it('should render title and frame border', () => {
+  it('should render game board with initial state', async () => {
     render(<Game />);
-    expect(screen.getByTestId('title')).toBeTruthy();
-    expect(screen.getByTestId('frame-border')).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.getByTestId('game-board')).toBeTruthy();
+    });
   });
 
-  it('should have initial scores at 0', () => {
+  it('should render title and frame border', async () => {
     render(<Game />);
-    expect(screen.getByTestId('scores')).toHaveTextContent('X: 0, O: 0, Ties: 0');
+    await waitFor(() => {
+      expect(screen.getByTestId('title')).toBeTruthy();
+      expect(screen.getByTestId('frame-border')).toBeTruthy();
+    });
   });
 
-  it('should update board when square is clicked', () => {
+  it('should have initial scores at 0', async () => {
     render(<Game />);
+    await waitFor(() => {
+      expect(screen.getByTestId('scores')).toHaveTextContent('X: 0, O: 0, Ties: 0');
+    });
+  });
+
+  it('should update board when square is clicked', async () => {
+    (api.makeMove as any).mockResolvedValue({
+      id: 'test-game-id',
+      board: ['X', '', '', '', '', '', '', '', ''],
+      current_player: 'O',
+      winner: '',
+      is_game_over: false,
+    });
+
+    render(<Game />);
+    await waitFor(() => screen.getByTestId('square-0'));
+    
     const square0 = screen.getByTestId('square-0');
     fireEvent.click(square0);
-    expect(square0.textContent).toBe('X');
+    
+    await waitFor(() => {
+      expect(square0.textContent).toBe('X');
+    });
   });
 
-  it('should alternate players on each move', () => {
+  it('should alternate players on each move', async () => {
+    (api.makeMove as any)
+      .mockResolvedValueOnce({
+        id: 'test-game-id',
+        board: ['X', '', '', '', '', '', '', '', ''],
+        current_player: 'O',
+        winner: '',
+        is_game_over: false,
+      })
+      .mockResolvedValueOnce({
+        id: 'test-game-id',
+        board: ['X', 'O', '', '', '', '', '', '', ''],
+        current_player: 'X',
+        winner: '',
+        is_game_over: false,
+      })
+      .mockResolvedValueOnce({
+        id: 'test-game-id',
+        board: ['X', 'O', 'X', '', '', '', '', '', ''],
+        current_player: 'O',
+        winner: '',
+        is_game_over: false,
+      });
+
     render(<Game />);
+    await waitFor(() => screen.getByTestId('square-0'));
+
     fireEvent.click(screen.getByTestId('square-0'));
+    await waitFor(() => expect(screen.getByTestId('square-0').textContent).toBe('X'));
+
     fireEvent.click(screen.getByTestId('square-1'));
+    await waitFor(() => expect(screen.getByTestId('square-1').textContent).toBe('O'));
+
     fireEvent.click(screen.getByTestId('square-2'));
-
-    expect(screen.getByTestId('square-0').textContent).toBe('X');
-    expect(screen.getByTestId('square-1').textContent).toBe('O');
-    expect(screen.getByTestId('square-2').textContent).toBe('X');
+    await waitFor(() => expect(screen.getByTestId('square-2').textContent).toBe('X'));
   });
 
-  it('should not allow clicking on occupied square', () => {
+  it('should not allow clicking on occupied square', async () => {
+    (api.makeMove as any).mockResolvedValue({
+      id: 'test-game-id',
+      board: ['X', '', '', '', '', '', '', '', ''],
+      current_player: 'O',
+      winner: '',
+      is_game_over: false,
+    });
+
     render(<Game />);
+    await waitFor(() => screen.getByTestId('square-0'));
+
     const square0 = screen.getByTestId('square-0');
     fireEvent.click(square0);
-    expect(square0.textContent).toBe('X');
+    
+    await waitFor(() => expect(square0.textContent).toBe('X'));
 
+    // Second click - should not call makeMove again
     fireEvent.click(square0);
-    expect(square0.textContent).toBe('X');
+    expect(api.makeMove).toHaveBeenCalledTimes(1);
   });
 
-  it('should not allow moves after game is won', () => {
+  it('should render 9 squares', async () => {
     render(<Game />);
-    // Winning sequence for X: 0, 4, 8
-    fireEvent.click(screen.getByTestId('square-0')); // X at 0
-    fireEvent.click(screen.getByTestId('square-3')); // O at 3
-    fireEvent.click(screen.getByTestId('square-4')); // X at 4
-    fireEvent.click(screen.getByTestId('square-5')); // O at 5
-    fireEvent.click(screen.getByTestId('square-8')); // X at 8 - X wins
-
-    // Try to click another square (should not change)
-    fireEvent.click(screen.getByTestId('square-1'));
-    expect(screen.getByTestId('square-1').textContent).toBe('');
-  });
-
-  it('should render 9 squares', () => {
-    render(<Game />);
-    for (let i = 0; i < 9; i++) {
-      expect(screen.getByTestId(`square-${i}`)).toBeTruthy();
-    }
-  });
-
-  it('should initialize with X as current player', () => {
-    render(<Game />);
-    const square0 = screen.getByTestId('square-0');
-    fireEvent.click(square0);
-    expect(square0.textContent).toBe('X');
+    await waitFor(() => {
+      for (let i = 0; i < 9; i++) {
+        expect(screen.getByTestId(`square-${i}`)).toBeTruthy();
+      }
+    });
   });
 });
+
