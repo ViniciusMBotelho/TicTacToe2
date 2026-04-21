@@ -1,7 +1,10 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+export type GameMode = "PVP" | "PVE";
+
 export interface StandardGame {
   id: string;
+  mode: GameMode;
   board: ("X" | "O" | "")[];
   current_player: "X" | "O";
   winner: "X" | "O" | "Z" | ""; // "Z" is Tie
@@ -9,11 +12,13 @@ export interface StandardGame {
 }
 
 /**
- * Creates a new standard Tic-Tac-Toe game.
+ * STANDARD (3x3) API
  */
-export async function createGame(): Promise<string> {
-  const response = await fetch(`${API_BASE_URL}/`, {
+export async function createGame(mode: GameMode = "PVP"): Promise<string> {
+  const response = await fetch(`${API_BASE_URL}/games/standard/`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mode }),
   });
 
   if (!response.ok) {
@@ -28,7 +33,7 @@ export async function createGame(): Promise<string> {
  * Retrieves the current state of a game.
  */
 export async function getGameState(id: string): Promise<StandardGame> {
-  const response = await fetch(`${API_BASE_URL}/${id}`);
+  const response = await fetch(`${API_BASE_URL}/games/standard/${id}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch game state");
@@ -41,7 +46,7 @@ export async function getGameState(id: string): Promise<StandardGame> {
  * Makes a move in the specified game.
  */
 export async function makeMove(id: string, cellIdx: number): Promise<StandardGame> {
-  const response = await fetch(`${API_BASE_URL}/${id}/move`, {
+  const response = await fetch(`${API_BASE_URL}/games/standard/${id}/move`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
