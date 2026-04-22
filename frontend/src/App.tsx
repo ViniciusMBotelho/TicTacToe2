@@ -2,12 +2,17 @@ import { useState } from "react";
 import "./styles/App.css";
 import Game from "./pages/Game/Game";
 import Menu from "./pages/Menu/Menu";
+import { GameMode } from "./utils/api";
 
 export default function App() {
-  const [gameMode, setGameMode] = useState<"MENU" | "PVP" | "PVE">("MENU");
+  const [gameMode, setGameMode] = useState<"MENU" | GameMode>("MENU");
 
-  const handleSelectMode = (mode: "PVP" | "PVE") => {
+  const handleSelectMode = (mode: GameMode) => {
     setGameMode(mode);
+  };
+
+  const handleBackToMenu = () => {
+    setGameMode("MENU");
   };
 
   return (
@@ -15,7 +20,7 @@ export default function App() {
       {gameMode === "MENU" ? (
         <Menu onSelectMode={handleSelectMode} />
       ) : (
-        <Game />
+        <Game mode={gameMode} onBack={handleBackToMenu} />
       )}
     </>
   );

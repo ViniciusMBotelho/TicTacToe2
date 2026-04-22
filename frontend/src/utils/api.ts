@@ -1,6 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export type GameMode = "PVP" | "PVE";
+export type GameMode = "PVP" | "PVE_EASY" | "PVE_MEDIUM" | "PVE_HARD";
 
 export interface StandardGame {
   id: string;

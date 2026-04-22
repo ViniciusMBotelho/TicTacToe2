@@ -25,9 +25,18 @@
   animation: fadeIn 0.6s ease-out;
 }
 
+.slideIn {
+  animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .title {
@@ -94,8 +103,23 @@
   opacity: 0.8;
 }
 
-.pve { border-left: 4px solid #dcbf3f; }
-.pvp { border-left: 4px solid #72cff9; }
+.pve, .pveMedium { border-left: 4px solid #dcbf3f; }
+.pvp, .pveEasy { border-left: 4px solid #72cff9; }
+.pveHard { border-left: 4px solid #ff4d4d; }
+
+.backButton {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: 'Fredoka One', cursive;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.backButton:hover {
+  color: white;
+}
 
 .futureOptions {
   margin-top: 1rem;
